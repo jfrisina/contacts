@@ -1,0 +1,3 @@
+# Tells git not to track these files
+db.php
+error.log
