@@ -41,7 +41,7 @@ $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?= htmlspecialchars($contact['first_name']) ?></td>
                     <td><?= htmlspecialchars($contact['last_name']) ?></td>
                     <td><?= htmlspecialchars($contact['email']) ?></td>
-                    <td><a href="/edit_contact_form.php?id=<?= urlencode($contact['id']) ?>" role="button">Edit</a></td>
+                    <td><a href="/edit_contact.php?id=<?= urlencode($contact['id']) ?>" role="button">Edit</a></td>
                 </tr>
 	        <?php endforeach; ?>
         <?php else: ?>
