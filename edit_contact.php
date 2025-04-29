@@ -1,4 +1,5 @@
 <?php
+namespace SARE\Contacts;
 /**
  * Edit Contact
  *
@@ -7,52 +8,41 @@
 require __DIR__ . '/init.php';
 
 // Get user id from URL
-try {
-	$id = filter_input( INPUT_GET, 'id', FILTER_VALIDATE_INT );
-} catch ( Exception $e ) {
+$id = filter_input( INPUT_GET, 'id', FILTER_VALIDATE_INT );
+if (!$id) {
     die( "Invalid contact ID" );
 }
 
-// Create SQL query, use placeholder :id for value binding
-$sql = "SELECT * FROM contacts WHERE id = :id";
+// Create a new empty contact using the Contact class
+$contact = Contact::get_by( 'id', $id ); // grab id column, and give the id that you want to get
+kint( $contact ); die;
 
-// Prevent SQL injection by preparing the SQL query using the database connection
-$stmt = $connection_string->prepare( $sql );
-
-// Bind the actual id value to the :id placeholder, treat as integer
-$stmt->bindParam( ':id', $id, PDO::PARAM_INT );
-
-// run the SQL against the database
-$stmt->execute();
-
-// fetch the added database row as an associative array with the column names as keys
-$contact = $stmt->fetch( PDO::FETCH_ASSOC );
 ?>
-    <html lang="">
+    <html lang="en">
     <head>
         <title>Edit Contact</title>
     </head>
     <body>
     <form action="#" method="post">
-        <input type="hidden" name="id" value="<?= (int) $contact['id'] ?>">
+        <input type="hidden" name="id" value="<?= (int) $contact->get('id', true) ?>">
         <!-- First Name -->
         <label for="firstname">First Name:</label>
-        <input type="text" id="firstname" name="firstname" value="<?= htmlspecialchars( $contact['first_name'] ) ?>" required aria-required="true">
+        <input type="text" id="firstname" name="firstname" value="<?= htmlspecialchars( $contact->get('first_name', true)) ?>" required aria-required="true">
 
         <!-- Last Name -->
         <label for="lastname">Last Name:</label>
-        <input type="text" id="lastname" name="lastname" value="<?= htmlspecialchars( $contact['last_name'] ) ?>" required aria-required="true">
+        <input type="text" id="lastname" name="lastname" value="<?= htmlspecialchars( $contact->get('last_name', true)) ?>" required aria-required="true">
 
         <!-- Email -->
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="<?= htmlspecialchars( $contact['email'] ) ?>" required aria-required="true">
+        <input type="email" id="email" name="email" value="<?= htmlspecialchars( $contact->get('email', true)) ?>" required aria-required="true">
 
         <!-- Country Code -->
         <label for="countrycode">Country Code:</label>
-        <input type="number" id="countrycode" name="countrycode" required value="<?= htmlspecialchars( $contact['country_code'] ) ?>" aria-required="true">
+        <input type="number" id="countrycode" name="countrycode" required value="<?= htmlspecialchars( $contact->get('country_code', false)) ?>" aria-required="true">
 
         <!-- Phone -->
-        <label for="phone">Phone:</label> <input type="tel" id="phone" name="phone" required  value="<?= htmlspecialchars( $contact['phone'] ) ?>" aria-required="true">
+        <label for="phone">Phone:</label> <input type="tel" id="phone" name="phone" required  value="<?= htmlspecialchars( $contact->get('phone', false)) ?>" aria-required="true">
 
         <!-- Submit Button -->
         <button type="submit">Submit</button>
@@ -61,7 +51,7 @@ $contact = $stmt->fetch( PDO::FETCH_ASSOC );
 
     <!-- Delete Button -->
     <form action="delete_contact_confirmation.php" method="post" onsubmit="return confirm('Are you sure you want to delete this contact?');">
-        <input type="hidden" name="id" value="<?= htmlspecialchars( $contact['id'] ) ?>">
+        <input type="hidden" name="id" value="<?= htmlspecialchars( $contact->get('id', true) ) ?>">
         <button type="submit">Delete Contact</button>
     </form>
 	<?php
@@ -149,7 +139,12 @@ $contact = $stmt->fetch( PDO::FETCH_ASSOC );
 
 <?php
 
-// Sanitize form field values
+/** Sanitize form field values
+ * @param string $value
+ *
+ * @return string
+ * @throws \Exception
+ */
 function sanitize_text( string $value ): string { // says that the end result will be a string (typecasting)
 
 	// Check encoding to make sure it is UTF-8
@@ -169,7 +164,11 @@ function sanitize_text( string $value ): string { // says that the end result wi
 	return $value;
 }
 
-// Sanitize email
+/** Sanitize email
+ * @param string $email
+ *
+ * @return string
+ */
 function sanitize_email( string $email ): string {
 
 	// put all to lowercase
