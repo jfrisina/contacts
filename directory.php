@@ -45,7 +45,7 @@ $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </tr>
 	        <?php endforeach; ?>
         <?php else: ?>
-            <!-- colspan makes it take up the width of 5 columns to prevent misalignment -->
+            <!-- colspan makes it take up the width of 5 columns -->
             <tr><td colspan="5">No users found.</td></tr>
         <?php endif; ?>
         </tbody>

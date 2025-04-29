@@ -8,9 +8,10 @@ require __DIR__ . '/init.php';
 
 // Ensure request is POST to prevent accidental deletions
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-	// Validate and sanitize the ID
-	$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-	if (!$id) {
+	try {
+		// Validate and sanitize the ID
+		$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+	} catch (Exception $e) {
 		die("Invalid contact ID.");
 	}
 
