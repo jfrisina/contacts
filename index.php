@@ -9,10 +9,11 @@ require __DIR__ . '/init.php';
 
 <!-- Page Title -->
     <h1>Contacts</h1>
-
 <?php
-echo "Today is " . date("l, F j, Y") . ".";
-echo "It is " . date("h:i a");
+// Timestamps
+echo "Today is " . date("l, F j, Y") . ".<br>";
+date_default_timezone_set('America/New_York');
+echo "It is " . date("h:i a") . "<br>";
 ?>
 <!-- Action Items -->
 <a href="/add_contact.php" role="button">Add New Contact</a>

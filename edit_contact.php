@@ -28,7 +28,7 @@ $stmt->execute();
 // fetch the added database row as an associative array with the column names as keys
 $contact = $stmt->fetch( PDO::FETCH_ASSOC );
 ?>
-    <html>
+    <html lang="">
     <head>
         <title>Edit Contact</title>
     </head>
@@ -46,6 +46,14 @@ $contact = $stmt->fetch( PDO::FETCH_ASSOC );
         <!-- Email -->
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" value="<?= htmlspecialchars( $contact['email'] ) ?>" required aria-required="true">
+
+        <!-- Country Code -->
+        <label for="countrycode">Country Code:</label>
+        <input type="number" id="countrycode" name="countrycode" required value="<?= htmlspecialchars( $contact['country_code'] ) ?>" aria-required="true">
+
+        <!-- Phone -->
+        <label for="phone">Phone:</label> <input type="tel" id="phone" name="phone" required  value="<?= htmlspecialchars( $contact['phone'] ) ?>" aria-required="true">
+
         <!-- Submit Button -->
         <button type="submit">Submit</button>
 
@@ -60,20 +68,22 @@ $contact = $stmt->fetch( PDO::FETCH_ASSOC );
 
 	// Send filled form info to database
 	if ( $_SERVER["REQUEST_METHOD"] == "POST" ) {
-		if ( ! empty( $_POST['firstname'] ) && ! empty( $_POST['lastname'] ) && ! empty( $_POST['email'] ) ) {
+		if ( ! empty( $_POST['firstname'] ) && ! empty( $_POST['lastname'] ) && ! empty( $_POST['email'] )  && ! empty( $_POST['countrycode'] ) && ! empty( $_POST['phone'] ) ) {
 			// Using placeholders to prevent SQL injection
-			$sql = 'UPDATE contacts SET first_name = :firstname, last_name = :lastname, email = :email WHERE id = :id';
+			$sql = 'UPDATE contacts SET first_name = :firstname, last_name = :lastname, email = :email, country_code = :countrycode, phone = :phone WHERE id = :id';
 			$stmt = $connection_string->prepare( $sql );
 
 			// get form field values and assign to a variable
 			$firstname = ( $_POST['firstname'] );
 			$lastname = ( $_POST['lastname'] );
 			$email = filter_var( $_POST['email'], FILTER_SANITIZE_EMAIL );
+			$countrycode = htmlspecialchars( $_POST['countrycode'] );
+			$phone = htmlspecialchars( $_POST['phone'] );
 
 			// sanitize values with error handling
 			try {
 				$firstname = sanitize_text( $firstname );
-			} catch ( Exception $e ) { // e stands for exception, not error. Exception is typecasting
+			} catch ( Exception $e ) { // e stands for exception, not error.
 				die( "First name failed: " . $e->getMessage() );
 			}
 
@@ -89,11 +99,25 @@ $contact = $stmt->fetch( PDO::FETCH_ASSOC );
 				die( "Email failed: " . $e->getMessage() );
 			}
 
+			try {
+				$countrycode = sanitize_text( $countrycode );
+			} catch ( Exception $e ) { // e stands for exception, not error. Exception is typecasting
+				die( "Country code failed: " . $e->getMessage() );
+			}
+
+			try {
+				$phone = sanitize_text( $phone );
+			} catch ( Exception $e ) { // e stands for exception, not error. Exception is typecasting
+				die( "Phone failed: " . $e->getMessage() );
+			}
+
 			// bind param instead of execute (lets you set type, all going in as strings otherwise)
 			// string is the default type, so you don't have to reiterate this, but if doing non-string, then enter the type
 			$stmt->bindParam( ':firstname', $firstname );
 			$stmt->bindParam( ':lastname', $lastname );
 			$stmt->bindParam( ':email', $email );
+			$stmt->bindParam( ':countrycode', $countrycode );
+			$stmt->bindParam( ':phone', $phone );
 			$stmt->bindParam( ':id', $_POST['id'], PDO::PARAM_INT );
 
 			// Send info to database
