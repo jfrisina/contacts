@@ -1,11 +1,50 @@
 <?php
+// Add to the Contacts namespace
+namespace SARE\Contacts;
+
 /**
  * Add a New Contact Form
  */
+
 // Imports
 require __DIR__ . '/init.php';
-?>
 
+// Check that the action and type are correct
+if (isset($_POST['action']) && $_POST['action'] === 'add') {
+	// Set variables
+	$allowed_keys = [
+		'first_name',
+		'last_name',
+		'email',
+		'country_code',
+		'phone'
+	];
+	$data = [];
+
+	// Loop through each key
+	foreach ( $allowed_keys as $post_key ) {
+		if ( isset( $_POST[ $post_key ] ) ) {
+			// Sanitize the fields
+			if ( $post_key == 'country_code' ) {
+				$data[ $post_key ] = filter_var( $_POST[ $post_key ], FILTER_SANITIZE_NUMBER_INT );
+			} elseif ( $post_key == 'email' ) {
+				$data[ $post_key ] = Sanitize::email( $_POST[ $post_key ] );
+			} else {
+				$data[ $post_key ] = Sanitize::text( $_POST[ $post_key ] );
+			}
+		}
+	}
+
+	// Add Contact
+	if ( Contact::add()) {
+		// Send to the main directory page after adding Contact
+		header( 'Location: /directory.php' );
+		exit;
+	} else {
+		echo "Could not add this contact";
+	}
+}
+    ?>
     <html lang="en">
     <head>
         <title>Contacts</title>
@@ -16,113 +55,29 @@ require __DIR__ . '/init.php';
 
     <!-- Tells browser where to send form data when submitted through button -->
     <!-- POST is more secure than GET -->
-    <form action="#" method="post">
+    <form method="post">
         <!-- First Name -->
-        <label for="firstname">First Name:</label>
-        <input type="text" id="firstname" name="firstname" required aria-required="true">
+        <label for="first_name">First Name:</label>
+        <input type="text" id="first_name" name="first_name" required aria-required="true">
 
         <!-- Last Name -->
-        <label for="lastname">Last Name:</label>
-        <input type="text" id="lastname" name="lastname" required aria-required="true">
+        <label for="last_name">Last Name:</label>
+        <input type="text" id="last_name" name="last_name" required aria-required="true">
 
         <!-- Email -->
         <label for="email">Email:</label> <input type="email" id="email" name="email" required aria-required="true">
 
         <!-- Country Code -->
-        <label for="countrycode">Country Code:</label>
-        <input type="number" id="countrycode" name="countrycode" required aria-required="true">
+        <label for="country_code">Country Code: +</label>
+        <input type="number" id="country_code" name="country_code" required aria-required="true">
 
         <!-- Phone -->
         <label for="phone">Phone:</label> <input type="tel" id="phone" name="phone" required aria-required="true">
 
         <!-- Submit Button -->
-        <button type="submit">Submit</button>
+        <button type="submit" value="add" name="action">Submit</button>
 
     </form>
     </body>
     </html>
 <?php
-
-// Send filled form info to database
-if ( $_SERVER["REQUEST_METHOD"] == "POST" ) {
-	// Ensure all fields are filled
-	if ( ! empty( $_POST['firstname'] ) && ! empty( $_POST['lastname'] ) && ! empty( $_POST['email'] ) && ! empty( $_POST['countrycode'] ) && ! empty( $_POST['phone'] ) ) {
-
-		// Create SQL query, use placeholders for value binding to prevent SQL injection
-		$sql = 'INSERT INTO contacts (first_name, last_name, email, country_code, phone) VALUES (:firstname, :lastname, :email, :countrycode, :phone)';
-
-		// prepare SQL query using database connection
-		$stmt = $connection_string->prepare( $sql );
-
-		// Sanitize values and assign to variables
-		// Sanitizing data makes it so that XSS and SQL injection can't happen. Prevents script tags from executing by escaping HTML characters so they aren't interpreted as code.
-		$firstname = htmlspecialchars( $_POST['firstname'] );
-		$lastname = htmlspecialchars( $_POST['lastname'] );
-		$email = filter_var( $_POST['email'], FILTER_SANITIZE_EMAIL );
-		$countrycode = htmlspecialchars( $_POST['countrycode'] );
-		$phone = htmlspecialchars( $_POST['phone'] );
-
-		// Bind values
-		// Binding values lets you set type, all going in as strings instead. String is the default type, so you don't have to reiterate this, but if doing non-string, then enter the type
-		$stmt->bindParam( ':firstname', $firstname );
-		$stmt->bindParam( ':lastname', $lastname );
-		$stmt->bindParam( ':email', $email );
-		$stmt->bindParam( ':countrycode', $countrycode );
-		$stmt->bindParam( ':phone', $phone );
-
-		// Send info to database
-		$success = $stmt->execute();
-		if ( $success ) {
-			?>
-            <html lang="en">
-            <body>
-            <h1>Your contact has been added!</h1><!-- Submission message --><p> <?= $_POST['firstname'] ?> <?= $_POST['lastname'] ?> has been added to our contacts!
-			<?php
-		}
-	} else {
-		echo 'You must fill out all fields.';
-	}
-}
-?>
-
-    <p>
-        <a href="/directory.php" role="button">Go to Directory</a>
-        <a href="/add_contact.php" role="button">Add Another Contact</a> <a href="/" role="button">Home</a>
-    </p>
-</body>
-    </html>
-
-<?php
-// Sanitize form field values
-function sanitize_text( string $value ): string { // says that the end result will be a string (type hinting)
-
-	// Check encoding to make sure it is UTF-8
-	if ( mb_check_encoding( $value, "UTF-8" ) === false ) {
-		throw new Exception( "This is not valid UTF-8" );
-	}
-
-	// Strip all tags
-	$value = strip_tags( $value );
-
-	// Remove white space
-	$value = trim( $value );
-
-	// Strip percent characters
-	$value = str_replace( '%', '', $value );
-
-	return $value;
-}
-
-// Sanitize email
-function sanitize_email( string $email ): string {
-	// put all to lowercase
-	$value = strtolower( $email );
-
-	// Allowed character regular expression: /[^a-z0-9+_.@-]/i.
-	$value = preg_replace( '/[^a-z0-9+_.@-]/i', '', $value );
-
-	// trim
-	$value = trim( $value );
-
-	return $value;
-}

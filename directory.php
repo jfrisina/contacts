@@ -1,8 +1,13 @@
 <?php
+// Add to the Contacts namespace
+namespace SARE\Contacts;
+use PDO;
+
 /**
  * Contacts Directory
  * Displays all contacts in a table format.
  */
+
 // Imports
 require __DIR__ . '/init.php';
 
@@ -13,10 +18,7 @@ $stmt->execute();
 $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<html>
-<head>
-    <title>Contacts</title>
-</head>
+<title>Contacts</title>
 <body>
 <!-- Page Title -->
 <h1>Contacts Directory</h1>
@@ -30,28 +32,29 @@ $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <th scope="col">First Name</th>
             <th scope="col">Last Name</th>
             <th scope="col">Email</th>
+            <th scope="col">Country Code</th>
             <th scope="col">Phone</th>
             <th scope="col">Edit</th>
         </tr>
         </thead>
         <tbody>
-        <?php if (!empty($contacts)): ?>
-	        <?php foreach ($contacts as $contact): ?>
+		<?php if (!empty($contacts)): ?>
+			<?php foreach ($contacts as $contact): ?>
                 <tr>
                     <td><?= htmlspecialchars($contact['id']) ?></td>
                     <td><?= htmlspecialchars($contact['first_name']) ?></td>
                     <td><?= htmlspecialchars($contact['last_name']) ?></td>
                     <td><?= htmlspecialchars($contact['email']) ?></td>
-                    <td><?= htmlspecialchars('+ ' . $contact['country_code'] . ' ' . $contact['phone']) ?></td>
+                    <td><?= htmlspecialchars('+' . $contact['country_code']) ?></td>
+                    <td><?= htmlspecialchars($contact['phone']) ?></td>
                     <td><a href="/edit_contact.php?id=<?= urlencode($contact['id']) ?>" role="button">Edit</a></td>
                 </tr>
-	        <?php endforeach; ?>
-        <?php else: ?>
+			<?php endforeach; ?>
+		<?php else: ?>
             <!-- colspan makes it take up the width of 5 columns -->
             <tr><td colspan="5">No users found.</td></tr>
-        <?php endif; ?>
+		<?php endif; ?>
         </tbody>
     </table>
 </div>
 </body>
-</html>
