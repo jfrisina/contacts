@@ -27,7 +27,7 @@ use PDO; // PHP's built-in database class "PHP Data Objects"
 	 * @param array $data
 	 */
 	public function __construct( array $data ) {
-		$this->id = $data['id'] ?: 0; // If the id is truthy, then use it. Otherwise, set it to 0.
+		$this->id = (int) ($data['id'] ?? null) ?: 0; // If the id is not set, then set it to null. If falsy, then set to 0. Cast as int.
 		$this->first_name = $data['first_name'] ?? null; // If the first name is set and not null, then use the first name. Otherwise, set it to null.
 		$this->last_name = $data['last_name'] ?? null;
 		$this->email = $data['email'] ?? null;
@@ -69,7 +69,7 @@ use PDO; // PHP's built-in database class "PHP Data Objects"
 			$stmt->execute();
 
 			// Fetch the added database row as an associative array with the column names as keys
-			$data = $stmt->fetch( PDO::FETCH_ASSOC );
+			$data = $stmt->fetch( PDO::FETCH_ASSOC ); // only gets one row
 
 			// "Yoda style" - if there is no data, then set it to an empty array
 			if ( false === $data ) {
@@ -79,6 +79,14 @@ use PDO; // PHP's built-in database class "PHP Data Objects"
 		// Show the data
 		return new Contact( $data );
 	}
+
+//	public static function get_all() {
+//		// Get contacts from database
+//		$sql = 'SELECT * FROM contacts ORDER BY last_name';
+//		$stmt = $connection_string->prepare($sql);
+//		$stmt->execute();
+//		$contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+//	}
 
 	/**
 	 * Get Contact object
@@ -92,6 +100,31 @@ use PDO; // PHP's built-in database class "PHP Data Objects"
 			throw new InvalidArgumentException("Property name must be provided.");
 		}
 		$value = $this->$property;
+		kint($value);
+		// if property is null
+		if ( null === $value ) {
+			//      if object has id,
+			if ( $this->id ) {
+				global $connection_string;
+				$sql = 'SELECT * FROM `contacts` WHERE `id` = :id';
+				// Prepare SQL query using database connection
+				$stmt = $connection_string-> prepare( $sql );
+				$stmt->bindParam( ':id', $this->id );
+				$stmt->execute();
+				$data = $stmt->fetch( PDO::FETCH_ASSOC );
+
+				$this->first_name = $data['first_name'];
+				$this->last_name = $data['last_name'];
+				$this->email = $data['email'];
+				$this->country_code = $data['country_code'];
+				$this->phone = $data['phone'];
+
+				$value = $this->$property;
+			} else {
+				$value = '';
+			}
+
+		}
 
 		if ( !$raw && $property === 'phone' ) {
 			$value = self::format_phone($this->country_code ?? '', $this->phone ?? '');
@@ -104,32 +137,32 @@ use PDO; // PHP's built-in database class "PHP Data Objects"
 	  *
 	  * @return bool
 	  */
-	 public static function add(): bool {
+	 public static function add( array $data ): bool {
 		 // Variables
 		 global $connection_string; // Set this as a global variable to let the function know to use the variable in the db.php instead of creating a new and locally scoped one.
 
 		 // Create SQL query, use placeholders (such as :id) for value binding to prevent SQL injection
-		 $sql = 'INSERT INTO contacts (first_name, last_name, email, country_code, phone) VALUES (:first_name, :last_name, :email, :country_code, :phone)';
+		 $sql = 'INSERT INTO `contacts` (`first_name`, `last_name`, `email`, `country_code`, `phone`) VALUES (:first_name, :last_name, :email, :country_code, :phone)';
 
 		 // Prepare SQL query using database connection
-		 $prepare_sql = $connection_string-> prepare( $sql );
+		 $stmt = $connection_string-> prepare( $sql );
 
 		 // Sanitize values and assign to variables
-		 $first_name = htmlspecialchars( $_POST['first_name'] );
-		 $last_name = htmlspecialchars( $_POST['last_name'] );
-		 $email = filter_var( $_POST['email'], FILTER_SANITIZE_EMAIL );
-		 $country_code = htmlspecialchars( $_POST['country_code'] );
-		 $phone = htmlspecialchars( $_POST['phone'] );
+		 $first_name = htmlspecialchars( $data['first_name'] );
+		 $last_name = htmlspecialchars( $data['last_name'] );
+		 $email = filter_var( $data['email'], FILTER_SANITIZE_EMAIL );
+		 $country_code = htmlspecialchars( $data['country_code'] );
+		 $phone = htmlspecialchars( $data['phone'] );
 
 		 // Bind values for security, clean code, and type safety
-		 $prepare_sql->bindParam( ':first_name', $first_name );
-		 $prepare_sql->bindParam( ':last_name', $last_name );
-		 $prepare_sql->bindParam(':email', $email );
-		 $prepare_sql->bindParam( 'country_code', $country_code);
-		 $prepare_sql->bindParam( ':phone', $phone );
+		 $stmt->bindParam( ':first_name', $first_name );
+		 $stmt->bindParam( ':last_name', $last_name );
+		 $stmt->bindParam(':email', $email );
+		 $stmt->bindParam( 'country_code', $country_code);
+		 $stmt->bindParam( ':phone', $phone );
 
 		 // Send info to database
-		 $success = $prepare_sql->execute();
+		 $success = $stmt->execute();
 		 if ( $success ) {
 			 echo 'Your contact has been added to the database.';
 			 $return = true;

@@ -36,7 +36,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'add') {
 	}
 
 	// Add Contact
-	if ( Contact::add()) {
+	if ( Contact::add( $_POST )) {
 		// Send to the main directory page after adding Contact
 		header( 'Location: /directory.php' );
 		exit;

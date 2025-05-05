@@ -14,6 +14,7 @@ $id = filter_input( INPUT_POST, 'id', FILTER_VALIDATE_INT );
 if (!$id) {
 	die( "Invalid contact ID" );
 }
+
 // Create a new empty contact using the Contact class
 $contact = Contact::get_by( 'id', $id ); // grab id column, and give the id that you want to get
 

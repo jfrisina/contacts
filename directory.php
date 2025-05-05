@@ -10,15 +10,17 @@ use PDO;
 
 // Imports
 require __DIR__ . '/init.php';
-
+/** @var PDO $connection_string */ //lets PHPStorm know this is a PDO object
 // Get contacts from database
-$sql = 'SELECT * FROM contacts';
+$sql = 'SELECT * FROM contacts ORDER BY last_name';
 $stmt = $connection_string->prepare($sql);
 $stmt->execute();
 $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
+<html lang="en">
+<head>
 <title>Contacts</title>
+</head>
 <body>
 <!-- Page Title -->
 <h1>Contacts Directory</h1>
@@ -57,4 +59,18 @@ $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tbody>
     </table>
 </div>
+<?php
+//testing the get code
+//$contact = new Contact(['id'=>1]);
+//kint($contact, $contact->get('first_name', true));
+//
+//$contact2 = new Contact(['phone'=>'1234567891', 'first_name'=>'Joe']);
+//kint($contact, $contact->get('phone', true));
+//
+//$contact3 = new Contact(['first_name'=>'jaki']);
+//kint($contact3, $contact3->get('email'));
+?>
+
 </body>
+</html>
+
