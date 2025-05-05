@@ -80,13 +80,17 @@ use PDO; // PHP's built-in database class "PHP Data Objects"
 		return new Contact( $data );
 	}
 
-//	public static function get_all() {
-//		// Get contacts from database
-//		$sql = 'SELECT * FROM contacts ORDER BY last_name';
-//		$stmt = $connection_string->prepare($sql);
-//		$stmt->execute();
-//		$contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-//	}
+	 /** Get all Contacts
+	  * @return array
+	  */
+	public static function get_all() {
+		global $connection_string;
+		// Get contacts from database
+		$sql = 'SELECT * FROM contacts ORDER BY last_name';
+		$stmt = $connection_string->prepare($sql);
+		$stmt->execute();
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
 
 	/**
 	 * Get Contact object

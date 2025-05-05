@@ -11,11 +11,10 @@ use PDO;
 // Imports
 require __DIR__ . '/init.php';
 /** @var PDO $connection_string */ //lets PHPStorm know this is a PDO object
-// Get contacts from database
-$sql = 'SELECT * FROM contacts ORDER BY last_name';
-$stmt = $connection_string->prepare($sql);
-$stmt->execute();
-$contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get all contacts
+$contacts = Contact::get_all();
+
 ?>
 <html lang="en">
 <head>
