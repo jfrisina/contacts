@@ -11,17 +11,16 @@ use PDO; // PHP's built-in database class "PHP Data Objects"
 
 // Create class for Contact. "final" prevents extending the class
  final class Contact {
-	// Properties (In a class, variables are called properties)
-     // "private" so that cannot be directly accessed, must go through the get method
+	// Properties (In a class, variables are called properties). Set to "private" so that cannot be directly accessed, must go through the get method
 	private int $id;
-	private ?string $first_name; // Question mark makes nullable instead of string only
+	private ?string $first_name; // "?string" means it can be string or null
 	private ?string $last_name;
 	private ?string $email;
 	private ?string $country_code;
 	private ?string $phone;
 
 	// Methods (In a class, functions are called methods)
-	/** Constructor Method: Create a new object from class Contact
+	/** Constructor Method: Create a new object from class Contact and sets properties
 	 * Gets called automatically when you create a new object.
 	 *
 	 * @param array $data
@@ -83,7 +82,7 @@ use PDO; // PHP's built-in database class "PHP Data Objects"
 	 /** Get all Contacts
 	  * @return array
 	  */
-	public static function get_all() {
+	public static function get_all(): array {
 		global $connection_string;
 		// Get contacts from database
 		$sql = 'SELECT * FROM contacts ORDER BY last_name';
@@ -104,33 +103,46 @@ use PDO; // PHP's built-in database class "PHP Data Objects"
 			throw new InvalidArgumentException("Property name must be provided.");
 		}
 		$value = $this->$property;
-		kint($value);
+
 		// if property is null
 		if ( null === $value ) {
-			//      if object has id,
+
+			// if object has id
 			if ( $this->id ) {
 				global $connection_string;
+
+				// Create SQL query
 				$sql = 'SELECT * FROM `contacts` WHERE `id` = :id';
+
 				// Prepare SQL query using database connection
 				$stmt = $connection_string-> prepare( $sql );
+
+				// Bind the parameters
 				$stmt->bindParam( ':id', $this->id );
+
+				// Execute the SQL
 				$stmt->execute();
+
+				// Get the data from the database
 				$data = $stmt->fetch( PDO::FETCH_ASSOC );
 
+				// Update the object's properties with data from the database
 				$this->first_name = $data['first_name'];
 				$this->last_name = $data['last_name'];
 				$this->email = $data['email'];
 				$this->country_code = $data['country_code'];
 				$this->phone = $data['phone'];
 
+				// Dynamically assign the value to whichever property was asked for
 				$value = $this->$property;
 			} else {
+				// Return an empty string if there isn't an id
 				$value = '';
 			}
-
 		}
-
+		// If it's for a phone and the data is not raw
 		if ( !$raw && $property === 'phone' ) {
+			// Format the phone number
 			$value = self::format_phone($this->country_code ?? '', $this->phone ?? '');
 		}
 		return $value;

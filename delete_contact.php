@@ -9,7 +9,7 @@ namespace SARE\Contacts;
 // Imports
 require __DIR__ . '/init.php';
 
-// Get user id from URL
+// Get user id from form
 $id = filter_input( INPUT_POST, 'id', FILTER_VALIDATE_INT );
 if (!$id) {
 	die( "Invalid contact ID" );
