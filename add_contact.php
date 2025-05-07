@@ -10,14 +10,14 @@ namespace SARE\Contacts;
 require __DIR__ . '/init.php';
 
 // Check that the action and type are correct
-if (isset($_POST['action']) && $_POST['action'] === 'add') {
+if ( isset( $_POST['action'] ) && $_POST['action'] === 'add' ) {
 	// Set variables
 	$allowed_keys = [
 		'first_name',
 		'last_name',
 		'email',
 		'country_code',
-		'phone'
+		'phone',
 	];
 	$data = [];
 
@@ -36,7 +36,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'add') {
 	}
 
 	// Add Contact
-	if ( Contact::add( $_POST )) {
+	if ( Contact::add( $_POST ) ) {
 		// Send to the main directory page after adding Contact
 		header( 'Location: /directory.php' );
 		exit;
@@ -44,7 +44,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'add') {
 		echo "Could not add this contact";
 	}
 }
-    ?>
+?>
     <html lang="en">
     <head>
         <title>Contacts</title>

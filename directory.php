@@ -1,6 +1,7 @@
 <?php
 // Add to the Contacts namespace
 namespace SARE\Contacts;
+
 use PDO;
 
 /**
@@ -14,11 +15,10 @@ require __DIR__ . '/init.php';
 
 // Get all contacts
 $contacts = Contact::get_all();
-
 ?>
 <html lang="en">
 <head>
-<title>Contacts</title>
+    <title>Contacts</title>
 </head>
 <body>
 <!-- Page Title -->
@@ -39,26 +39,27 @@ $contacts = Contact::get_all();
         </tr>
         </thead>
         <tbody>
-		<?php if (!empty($contacts)): ?>
-			<?php foreach ($contacts as $contact): ?>
-                <tr>
-                    <td><?= htmlspecialchars($contact['id']) ?></td>
-                    <td><?= htmlspecialchars($contact['first_name']) ?></td>
-                    <td><?= htmlspecialchars($contact['last_name']) ?></td>
-                    <td><?= htmlspecialchars($contact['email']) ?></td>
-                    <td><?= htmlspecialchars('+' . $contact['country_code']) ?></td>
-                    <td><?= htmlspecialchars($contact['phone']) ?></td>
-                    <td><a href="/edit_contact.php?id=<?= urlencode($contact['id']) ?>" role="button">Edit</a></td>
-                </tr>
-			<?php endforeach; ?>
-		<?php else: ?>
+		<?php if ( ! empty( $contacts ) ): ?><?php foreach ( $contacts as $contact ): ?>
+            <tr>
+                <td><?= htmlspecialchars( $contact->get( 'id' ) ) ?></td>
+                <td><?= htmlspecialchars( $contact->get( 'first_name' ) ) ?></td>
+                <td><?= htmlspecialchars( $contact->get( 'last_name' ) ) ?></td>
+                <td><?= htmlspecialchars( $contact->get( 'email' ) ) ?></td>
+                <td><?= htmlspecialchars( '+' . $contact->get( 'country_code' ) ) ?></td>
+                <td><?= htmlspecialchars( $contact->get( 'phone' ) ) ?></td>
+                <td><a href="/edit_contact.php?id=<?= urlencode( $contact->get( 'id' ) ) ?>" role="button">Edit</a></td>
+            </tr>
+		<?php endforeach; ?><?php else: ?>
             <!-- colspan makes it take up the width of 5 columns -->
-            <tr><td colspan="5">No users found.</td></tr>
+            <tr>
+                <td colspan="5">No users found.</td>
+            </tr>
 		<?php endif; ?>
         </tbody>
     </table>
 </div>
 <?php
+
 //testing the get code
 //$contact = new Contact(['id'=>1]);
 //kint($contact, $contact->get('first_name', true));
